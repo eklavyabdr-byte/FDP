@@ -1,18 +1,63 @@
+% Frequency Modulation and Demodulation Simulation
+clear; clc; close all;
 
-import cv2
+%% Parameter Settings
+Fs = 10000;          % Sampling frequency (Hz) (Must satisfy Fs >= 2*Fc)
+t = 0:1/Fs:0.5;      % Time vector (0.5 seconds duration)
 
-# Read the image
-image = cv2.imread(r"C:\Users\PRIYANKA M\OneDrive\Pictures\OIP.jpg")
+Fc = 500;            % Carrier frequency (Hz)
+Fm = 35;             % Message signal frequency (Hz)
+beta = 5;            % Modulation index
 
-# Check if the image is loaded
-if image is None:
-    print("Image not found!")
-else:
-    # Display the image
-    cv2.imshow("Image", image)
+% Calculate frequency deviation based on modulation index: beta = freqdev / Fm
+freqdev = beta * Fm; % Frequency deviation (Hz) (Must satisfy freqdev < Fc)
 
-    # Wait until a key is pressed
-    cv2.waitKey(0)
+%% 1. Signal Generation (Message & Carrier)
+% Message/Modulating Signal
+msg_signal = sin(2*pi*Fm*t); 
 
-    # Close all windows
-    cv2.destroyAllWindows()
+% Carrier Signal (for visual representation only)
+carrier_signal = sin(2*pi*Fc*t);
+
+%% 2. Frequency Modulation (FM)
+% Uses Communications Toolbox built-in FM Modulation function
+fm_signal = fmmod(msg_signal, Fc, Fs, freqdev);
+
+%% 3. Frequency Demodulation
+% Uses Communications Toolbox built-in FM Demodulation function
+demod_signal = fmdemod(fm_signal, Fc, Fs, freqdev);
+
+%% 4. Graphical Plotting
+figure('Name', 'Frequency Modulation and Demodulation', 'NumberTitle', 'off');
+
+% Plot Message Signal
+subplot(4,1,1);
+plot(t, msg_signal, 'b', 'LineWidth', 1.5);
+title('1. Message Signal (Information)');
+xlabel('Time (s)'); ylabel('Amplitude');
+grid on;
+axis([0 0.2 -1.2 1.2]); % Zoomed in for better visual analysis
+
+% Plot Carrier Signal
+subplot(4,1,2);
+plot(t, carrier_signal, 'r');
+title('2. Carrier Signal');
+xlabel('Time (s)'); ylabel('Amplitude');
+grid on;
+axis([0 0.02 -1.2 1.2]); % Heavily zoomed to show high-frequency cycles
+
+% Plot Modulated Signal
+subplot(4,1,3);
+plot(t, fm_signal, 'm');
+title('3. Frequency Modulated (FM) Signal');
+xlabel('Time (s)'); ylabel('Amplitude');
+grid on;
+axis([0 0.1 -1.2 1.2]); 
+
+% Plot Demodulated Signal
+subplot(4,1,4);
+plot(t, demod_signal, 'g', 'LineWidth', 1.5);
+title('4. Demodulated Signal (Recovered)');
+xlabel('Time (s)'); ylabel('Amplitude');
+grid on;
+axis([0 0.2 -1.2 1.2]);
